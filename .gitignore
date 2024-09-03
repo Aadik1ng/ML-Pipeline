@@ -1,6 +1,7 @@
 data
 models
-reports
+logs
+plots
 
 
 # Byte-compiled / optimized / DLL files

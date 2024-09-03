@@ -1,0 +1,59 @@
+data_ingestion:
+  test_size: 0.20
+  data_url: './data/Stock Market Dataset.csv'
+
+
+data_visualization:
+  file_path: "./data/transformed_data.csv"  # Update with the actual path
+  stock_names:  # List of stock names for which you want to visualize distribution and scatter plots
+    - "Apple"
+    - "Tesla"
+    - "Microsoft"
+    - "Google"
+  correlation_pairs:  # List of stock pairs or one stock vs list of others to analyze correlation
+    - ["Apple", "Tesla"]
+    - ["Google", "Microsoft"]
+    - ["Apple", "Google", "Tesla"]  # Apple vs Google and Tesla
+
+
+
+feature_engineering:
+  file_path: './data/transformed_data.csv'  # Path to the raw data CSV file
+  output_path: './data/engineered_data.csv'  # Path to save the engineered data CSV file
+  missing_value_method: 'fill_mean'  # Method to handle missing values: 'drop', 'fill_mean', or 'fill_median'
+  lags: [1, 2, 3]  # List of lags for creating lag features
+  windows: [5, 10]  # List of windows for creating rolling statistics
+
+ # Windows for rolling statistics
+
+
+
+model_building:
+  data_file: 'data/engineered_data.csv'
+  save_path: './data'
+  model_name: 'RandomForestRegressor'
+  hyperparameters:
+    n_estimators: 100
+    max_depth: 10
+    random_state: 42
+  model_path: 'models/stock_price_model.pkl'
+  predictions_file: 'predictions/stock_price_predictions.csv'
+  test_size: 0.2
+
+
+
+
+model_evaluation:
+  X_test_path: './data/X_test.csv'
+  y_test_path: './data/y_test.csv'
+  X_train_path: './data/X_train.csv'
+  y_train_path: './data/y_train.csv'
+  model_path: './models/stock_price_model.pkl'
+
+
+prediction:
+  stock_name: 'Bitcoin'
+  prediction_period: 30  # Number of days to predict
+  model_path: 'models/stock_price_model.pkl'
+  output_file: 'predictions/apple_predictions.csv'
+  X_test_path: './data/X_test.csv'
