@@ -10,7 +10,9 @@ from sklearn.svm import SVR
 from sklearn.neural_network import MLPRegressor
 from sklearn.metrics import mean_squared_error
 import joblib  # For saving the model
-
+import mlflow
+import mlflow.sklearn
+import dagshub
 # Ensure the "logs" directory exists
 log_dir = 'logs'
 os.makedirs(log_dir, exist_ok=True)
@@ -32,6 +34,9 @@ file_handler.setFormatter(formatter)
 
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
+
+dagshub.init(repo_owner='Aadik1ng', repo_name='HubbleMind', mlflow=True)
+mlflow.set_tracking_uri("https://dagshub.com/Aadik1ng/HubbleMind.mlflow")
 
 def load_params(params_path: str) -> dict:
     """Load parameters from a YAML file."""
@@ -62,6 +67,8 @@ def load_data(file_path: str) -> pd.DataFrame:
 
 def get_model(model_name: str, hyperparams: dict):
     """Retrieve the machine learning model based on the model name and hyperparameters."""
+    mlflow.log_param("model_type", "RandomForest")
+
     try:
         if model_name == 'LinearRegression':
             return LinearRegression(**hyperparams)
@@ -82,8 +89,10 @@ def get_model(model_name: str, hyperparams: dict):
 
 def train_model(model, X_train: pd.DataFrame, y_train: pd.Series):
     """Train the specified machine learning model."""
+
     try:
         model.fit(X_train, y_train)
+
         logger.debug('Model trained successfully')
         return model
     except Exception as e:
@@ -123,6 +132,8 @@ def save_data(data, path, filename):
 
 def main():
     try:
+        mlflow.start_run()
+
         # Load parameters
         params = load_params(params_path='params.yaml')
         model_dir='models'
@@ -148,15 +159,19 @@ def main():
 
         # Get and train the model
         model = get_model(model_name, hyperparams)
+        for param, value in hyperparams.items():
+            mlflow.log_param(param, value)
         model = train_model(model, X_train, y_train)
+        mlflow.sklearn.log_model(model, "model")
 
         # Evaluate the model
         mse = evaluate_model(model, X_test, y_test)
         logger.info('Model performance: Mean Squared Error (MSE) = %.4f', mse)
-
+        mlflow.log_metric("mse", mse)
         # Save the model
         save_model(model, model_path)
         logger.info('Model saved to %s', model_path)
+        mlflow.end_run()
 
         logger.info('Model training and saving process completed successfully')
     except Exception as e:

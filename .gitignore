@@ -56,11 +56,11 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
-
+scraped_python_files.txt
 # Translations
 *.mo
 *.pot
-
+scrap.py
 # Django stuff:
 *.log
 local_settings.py
